@@ -340,8 +340,8 @@ window.onload = function() {
   SignalDistantTile.prototype.setAspectHalt =
   SignalDistantReverseTile.prototype.setAspectHalt = function() {
     this.setAspectOff()
-    this.withOptic('distant-ll', function(o) {o.addClass('tile-signal-yellow')})
-    this.withOptic('distant-ur', function(o) {o.addClass('tile-signal-yellow')})
+    this.withOptic('distant-ll', o => o.addClass('tile-signal-yellow'))
+    this.withOptic('distant-ur', o => o.addClass('tile-signal-yellow'))
   }
 
 
@@ -419,7 +419,6 @@ window.onload = function() {
   })
 
   function setSomeState(e) {
-    console.log("setSignalsToHalt")
     forAllTiles(function(e) {
       e.setOccupied(false)
       if (e instanceof AbstractSignalTile) {
