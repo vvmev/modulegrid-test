@@ -9,8 +9,21 @@
   stroke: #999;
 }
 
+.tile-label {
+  font-family: Arial;
+  font-size: 10pt;
+  fill: #000;
+}
+
+.tile-label-right {
+  text-anchor: end;
+}
+
 .tile-track {
   fill: #888;
+}
+.tile-track-occupied {
+  fill: #f44;
 }
 
 .tile-track-switch {
