@@ -334,7 +334,7 @@ window.onload = function() {
     var s = e.group()
     this.signalMast(s, true)
     this.signalDistant(s)
-    s.move(tileWidth * 0.20, tileHeight * 0.15).rotate(180)
+    s.move(tileWidth * 0.53, tileHeight * 0.15).rotate(180)
   })
 
   SignalDistantTile.prototype.setAspectHalt =
