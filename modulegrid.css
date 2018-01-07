@@ -1,0 +1,38 @@
+/*
+ *
+ */
+
+.tile-box {
+  fill: #aa9;
+}
+.tile-box-border {
+  stroke: #999;
+}
+
+.tile-track {
+  fill: #888;
+}
+
+.tile-track-switch {
+  fill: #fff;
+}
+
+.tile-signal-mast {
+  fill: #333;
+}
+
+.tile-signal-off {
+  fill: #888
+}
+.tile-signal-red {
+  fill: #f00
+}
+.tile-signal-green {
+  fill: #0f6
+}
+.tile-signal-yellow {
+  fill: #ff0
+}
+.tile-signal-white {
+  fill: #fff
+}
