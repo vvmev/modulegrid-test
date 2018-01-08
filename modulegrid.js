@@ -183,6 +183,9 @@ window.onload = function() {
        .addClass("tile-label")
        .move(tileWidth * 0.1, tileHeight * 0.15)
     }
+  }, function() {
+    this.homeAspect = 'Hp0'
+    this.distantAspect = 'Vr0'
   })
 
   AbstractSignalTile.prototype.signalMast = function(s, short) {
@@ -241,9 +244,61 @@ window.onload = function() {
 
   AbstractSignalTile.prototype.setAspectOff = function() {
     for (const optic in this.optics) {
-      for (var i=0; i < this.colors.length; i++) {
-        this.optics[optic].removeClass("tile-signal-" + this.colors[i])
-      }
+      this.setColor(optic, 'off')
+    }
+  }
+
+  AbstractSignalTile.prototype.setColor = function(o, c) {
+    if (this.optics[o] === undefined)
+      return false
+    for (var i=0; i < this.colors.length; i++) {
+      this.optics[o].removeClass("tile-signal-" + this.colors[i])
+    }
+    this.optics[o].addClass("tile-signal-" + c)
+  }
+
+  AbstractSignalTile.prototype.setHomeAspect = function(a) {
+    this.homeAspect = a
+    switch (a) {
+      case 'Hp0':
+        this.setColor('home-l', 'red')
+        this.setColor('home-u', 'off')
+        break;
+      case 'Hp1':
+        this.setColor('home-l', 'off')
+        this.setColor('home-u', 'green')
+        break;
+      case 'Hp2':
+        this.setColor('home-l', 'yellow')
+        this.setColor('home-u', 'green')
+        break;
+    }
+    this.setDistantAspect(this.distantAspect)
+  }
+
+  AbstractSignalTile.prototype.setDistantAspect = function(a) {
+    this.distantAspect = a
+    switch (this.homeAspect) {
+      case 'Hp0':
+        this.setColor('distant-ll', 'off')
+        this.setColor('distant-ur', 'off')
+        break;
+      default:
+        switch (a) {
+          case 'Vr0':
+            this.setColor('distant-ll', 'yellow')
+            this.setColor('distant-ur', 'yellow')
+            break;
+          case 'Vr1':
+            this.setColor('distant-ll', 'green')
+            this.setColor('distant-ur', 'green')
+            break;
+          case 'Vr2':
+            this.setColor('distant-ll', 'yellow')
+            this.setColor('distant-ur', 'green')
+            break;
+        }
+        break;
     }
   }
 
@@ -343,7 +398,40 @@ window.onload = function() {
     this.withOptic('distant-ll', o => o.addClass('tile-signal-yellow'))
     this.withOptic('distant-ur', o => o.addClass('tile-signal-yellow'))
   }
+  SignalDistantTile.prototype.setHomeAspect =
+  SignalDistantReverseTile.prototype.setHomeAspect = function(a) {
+    AbstractSignalTile.prototype.setHomeAspect.call(this, 'Hp2') // single distant signal always shows aspect
+  }
 
+
+
+  function Signal(name, home, distant) {
+    this.name = name
+    this.home = home
+    this.distant = distant
+    this.distantAspectFromHomeAspect = {
+      'Hp0': 'Vr0',
+      'Hp1': 'Vr1',
+      'Hp2': 'Vr2',
+    }
+  }
+
+  Signal.prototype.setAspect = function(aspect) {
+    this.home.setHomeAspect(aspect)
+    if (this.distant !== undefined)
+      this.distant.setDistantAspect(this.distantAspectFromHomeAspect[aspect])
+  }
+
+
+  var signals = []
+  signals['A'] = new Signal('A', new SignalHomeDistantAltTile("A"), new SignalDistantTile("a"))
+  signals['B'] = new Signal('B', new SignalAltTile("B"), new SignalDistantTile("b"))
+  signals['F'] = new Signal('F', new SignalHomeDistantAltReverseTile("F"), new SignalDistantReverseTile("f"))
+  signals['N2'] = new Signal('N2', new SignalHomeTile("N2"))
+  signals['N3'] = new Signal('N3', new SignalHomeTile("N3"), signals['A'].home) // A has the distant signal for N3 if W2a/b+ and W2c/d+
+  signals['P2'] = new Signal('P2', new SignalHomeDistantReverseTile("P2"))
+  signals['P4'] = new Signal('P4', new SignalHomeDistantReverseTile("P4"), signals['F'].home) // F has the distant signal for P4 if W6+
+  // the distant signal at P4 is not currently wired up
 
   const emptyTile = new EmptyTile()
   var tiles = Array(numTilesVertically).fill().map(() => Array(numTilesHorizontally).fill(emptyTile))
@@ -353,27 +441,27 @@ window.onload = function() {
   tiles[0][2] = new StraightTile()
   tiles[0][3] = new TurnoutRightTile("W1")
   tiles[0][4] = new StraightTile()
-  tiles[0][5] = new SignalHomeDistantReverseTile("P4")
+  tiles[0][5] = signals['P4'].home
   tiles[0][6] = new StraightTile()
   tiles[0][7] = new StraightTile()
   tiles[0][8] = new StraightTile()
   tiles[0][9] = new StraightTile()
   tiles[0][10] = new StraightTile()
   tiles[0][11] = new TurnoutLeftReverseTile("W6")
-  tiles[0][12] = new SignalHomeDistantAltReverseTile("F")
+  tiles[0][12] = signals['F'].home
   tiles[0][13] = new StraightTile()
-  tiles[0][14] = new SignalDistantReverseTile("f")
+  tiles[0][14] = signals['F'].distant
 
-  tiles[1][0] = new SignalDistantTile("a")
+  tiles[1][0] = signals['A'].distant
   tiles[1][1] = new StraightTile()
-  tiles[1][2] = new SignalAltTile("A")
+  tiles[1][2] = signals['A'].home
   tiles[1][3] = new TurnoutRightReverseTile("W2a/b")
   tiles[1][4] = new TurnoutRightTile("W2c/d")
   tiles[1][5] = new StraightTile()
   tiles[1][6] = new StraightTile()
   tiles[1][7] = new StraightTile()
   tiles[1][8] = new StraightTile()
-  tiles[1][9] = new SignalHomeDistantTile("N3")
+  tiles[1][9] = signals['N3'].home
   tiles[1][10] = new TurnoutLeftReverseTile("W5a/b")
   tiles[1][11] = new TurnoutLeftTile("W5c/d")
   tiles[1][12] = new StraightTile()
@@ -383,18 +471,18 @@ window.onload = function() {
   // tiles[2][0] = new StraightTile()
   // tiles[2][1] = new StraightTile()
   tiles[2][2] = new LeftReverseTile()
-  tiles[2][3] = new SignalAltTile("B")
+  tiles[2][3] = signals['B'].home
   tiles[2][4] = new TurnoutRightReverseTile("W3a/b")
   tiles[2][5] = new TurnoutRightTile("W3c/d")
-  tiles[2][6] = new SignalHomeDistantReverseTile("P2")
+  tiles[2][6] = signals['P2'].home
   tiles[2][7] = new StraightTile()
   tiles[2][8] = new StraightTile()
-  tiles[2][9] = new SignalHomeDistantTile("N2")
+  tiles[2][9] = signals['N2'].home
   tiles[2][10] = new LeftTile()
   //tiles[2][11] = new StraightTile()
 
   tiles[3][0] = new StraightTile()
-  tiles[3][1] = new SignalDistantTile("b")
+  tiles[3][1] = signals['B'].distant
   tiles[3][2] = new LeftTile()
   // tiles[3][3] = new StraightTile()
   // tiles[3][4] = new StraightTile()
@@ -418,17 +506,36 @@ window.onload = function() {
     e.draw(draw).move(x * tileWidth, y * tileHeight)
   })
 
-  function setSomeState(e) {
+  setTimeout(function() {
     forAllTiles(function(e) {
       e.setOccupied(false)
-      if (e instanceof AbstractSignalTile) {
-        e.setAspectHalt()
-      }
       if (e instanceof AbstractTurnoutTile) {
         e.setSwitch(false)
       }
     })
+    for (signal in signals) {
+      if (signals[signal].distant !== undefined)
+        signals[signal].distant.setHomeAspect('Hp0') // need to init pure distant signals
+      signals[signal].setAspect('Hp0')
+    }
+  }, 1000)
+
+  function someSteps() {
+    steps = [
+      () => signals['A'].setAspect('Hp1'),
+      () => signals['N3'].setAspect('Hp1'),
+      () => signals['A'].setAspect('Hp0'),
+      () => signals['N3'].setAspect('Hp0'),
+    ]
+    step = 0
+
+    setInterval(function() {
+      steps[step]()
+      step += 1
+      if (step >= steps.length)
+        step = 0
+    }, 2000)
   }
 
-  setTimeout(setSomeState, 2000)
+  someSteps()
 }
