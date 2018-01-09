@@ -263,15 +263,22 @@ window.onload = function() {
       case 'Hp0':
         this.setColor('home-l', 'red')
         this.setColor('home-u', 'off')
+        this.setColor('alternate', 'off')
         break;
       case 'Hp1':
         this.setColor('home-l', 'off')
         this.setColor('home-u', 'green')
+        this.setColor('alternate', 'off')
         break;
       case 'Hp2':
         this.setColor('home-l', 'yellow')
         this.setColor('home-u', 'green')
+        this.setColor('alternate', 'off')
         break;
+      case 'Zs1':
+        this.setColor('home-l', 'off')
+        this.setColor('home-u', 'off')
+        this.setColor('alternate', 'white')
     }
     this.setDistantAspect(this.distantAspect)
   }
@@ -280,6 +287,7 @@ window.onload = function() {
     this.distantAspect = a
     switch (this.homeAspect) {
       case 'Hp0':
+      case 'Zs1':
         this.setColor('distant-ll', 'off')
         this.setColor('distant-ur', 'off')
         break;
